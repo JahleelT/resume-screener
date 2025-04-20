@@ -16,13 +16,16 @@ mongo = MongoClient("mongodb://mongo:27017/")
 db = mongo["resume_db"]
 collection = db["analyses"]
 
+
 def extract_text_from_file(path):
     # TODO: Add real PDF parsing later
     return f"Simulated resume content for: {path}"
 
+
 def fetch_job_description(url):
     # TODO: Replace with scraping logic if needed
     return f"Simulated job description for URL: {url}"
+
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -38,40 +41,47 @@ def analyze():
 
     # Construct prompt for GPT
     prompt = f"""
-    You're a resume screener. Compare the resume below with the job description.
-    Give a short summary and a list of 3–5 suggestions to improve the resume to better match the job.
+        You’re a resume‑screening expert. Compare the candidate’s resume below against the job description and provide:
 
-    Resume:
-    {resume_text}
+        1. A brief “summary” of the overall fit.
+        2. A list of 3–5 **generic_recommendations** covering high‑level guidance on formatting, structure, tone, and overall approach.
+        3. A list of 3–5 **specific_recommendations** with concrete edits to bullet points, keyword choices, metrics, and language to better mirror the job description.
 
-    Job Description:
-    {job_description}
+        Resume:
+        {resume_text}
 
-    Respond with ONLY a JSON object, and nothing else. Format it like this:
-    {{
-    "summary": "...",
-    "suggestions": ["...", "...", "..."]
-    }}
+        Job Description:
+        {job_description}
+
+        Respond with **only** a JSON object in exactly this format (no extra keys, no prose outside the JSON):
+
+        {{
+        "summary": "…",
+        "generic_suggestions": [
+            "…",
+            "…",
+            "…"
+        ],
+        "specific_suggestions": [
+            "…",
+            "…",
+            "…"
+        ]
+        }}
     """
 
-    headers = {
-        "Authorization": f"Bearer {OPENAI_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
 
     payload = {
         "model": "gpt-4o",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
-        "temperature": 0.7
+        "temperature": 0.7,
     }
 
     try:
         gpt_response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30
+            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=30
         )
 
         print("✅ Raw OpenAI HTTP response status:", gpt_response.status_code)
@@ -86,27 +96,21 @@ def analyze():
         print("<<< END GPT OUTPUT")
 
         # Clean up markdown code block
-        if raw_output.startswith("```"):
-            raw_output = re.sub(r"^```(?:json)?\\s*", "", raw_output)
-            raw_output = re.sub(r"\\s*```$", "", raw_output)
 
         try:
-            result = json.loads(raw_output)
+            m = re.search(r"\{.*\}", raw_output, re.DOTALL)
+            if m:
+                result = json.loads(m.group(0))
         except json.JSONDecodeError:
             print("❌ Failed to decode GPT output:\n", raw_output)
-            result = {
-                "summary": "GPT response could not be parsed.",
-                "suggestions": []
-            }
+            result = {"summary": "OpenAI API call failed.", "generic_suggestions": [], "specific_suggestions": []}
 
     except Exception as e:
         import traceback
+
         print("❌ Error communicating with OpenAI:")
         traceback.print_exc()
-        result = {
-            "summary": "OpenAI API call failed.",
-            "suggestions": []
-        }
+        result = {"summary": "OpenAI API call failed.", "generic_suggestions": [], "specific_suggestions": []}
 
     result["job_url"] = job_url
     result["resume_path"] = resume_path
@@ -116,6 +120,7 @@ def analyze():
     result["_id"] = str(inserted.inserted_id)
 
     return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

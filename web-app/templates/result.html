@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head><title>Results</title></head>
-<body>
-  <h1>Analysis Results</h1>
-  <p><strong>Summary:</strong> {{ result.summary }}</p>
-  <p><strong>Suggestions:</strong></p>
-  <ul>
-    {% for s in result.suggestions %}
+  <head>
+    <title>Results</title>
+  </head>
+  <body>
+    <h1>Analysis Results</h1>
+    <p><strong>Summary:</strong> {{ result.summary }}</p>
+    <p><strong>Suggestions:</strong></p>
+    <ul>
+      {% for s in result.generic_suggestions %}
       <li>{{ s }}</li>
-    {% endfor %}
-  </ul>
-</body>
+      {% endfor %}
+    </ul>
+    <ul>
+      {% for s in result.specific_suggestions %}
+      <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+  </body>
 </html>
