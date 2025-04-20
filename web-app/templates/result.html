@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Results</title></head>
+<body>
+  <h1>Analysis Results</h1>
+  <p><strong>Summary:</strong> {{ result.summary }}</p>
+  <p><strong>Suggestions:</strong></p>
+  <ul>
+    {% for s in result.suggestions %}
+      <li>{{ s }}</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
