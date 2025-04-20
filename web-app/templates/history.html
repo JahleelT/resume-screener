@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Past Analyses</title>
+</head>
+<body>
+  <h1>Previous Resume Analyses</h1>
+  <ul>
+    {% for record in records %}
+      <li>
+        <strong>Job URL:</strong> {{ record.job_url }}<br/>
+        <strong>Resume File:</strong> {{ record.resume_path }}<br/>
+        <strong>Summary:</strong> {{ record.summary }}<br/>
+        <strong>Suggestions:</strong>
+        <ul>
+          {% for s in record.suggestions %}
+            <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+        <hr/>
+      </li>
+    {% endfor %}
+  </ul>
+  <a href="/">Back to Home</a>
+</body>
+</html>
