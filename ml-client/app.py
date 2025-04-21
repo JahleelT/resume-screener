@@ -18,6 +18,7 @@ mongo = MongoClient("mongodb://mongo:27017/")
 db = mongo["resume_db"]
 collection = db["analyses"]
 
+
 def extract_text_from_file(path):
     try:
         doc = fitz.open(path)
@@ -62,11 +63,11 @@ def analyze():
     - "suggestions": 3–5 concrete ways to improve the resume
     - "job_focus": a bullet-style list of what the job posting emphasizes (skill sets, experience, traits)
 
-    Resume:
-    {resume_text}
+        Resume:
+        {resume_text}
 
-    Job Description:
-    {job_description}
+        Job Description:
+        {job_description}
 
     Respond with only the raw JSON object. No commentary or formatting. Format exactly like:
     {{
@@ -76,10 +77,7 @@ def analyze():
     }}
     """
 
-    headers = {
-        "Authorization": f"Bearer {OPENAI_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
 
     payload = {
         "model": "gpt-4o",
@@ -90,10 +88,7 @@ def analyze():
 
     try:
         gpt_response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30
+            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=30
         )
 
         print("✅ OpenAI response status:", gpt_response.status_code)
@@ -110,7 +105,9 @@ def analyze():
             raw_output = raw_output[1:-1]
 
         try:
-            result = json.loads(raw_output)
+            m = re.search(r"\{.*\}", raw_output, re.DOTALL)
+            if m:
+                result = json.loads(m.group(0))
         except json.JSONDecodeError:
             print("❌ Failed to decode GPT output:\n", raw_output)
             result = {
@@ -121,6 +118,7 @@ def analyze():
 
     except Exception as e:
         import traceback
+
         print("❌ Error communicating with OpenAI:")
         traceback.print_exc()
         result = {
