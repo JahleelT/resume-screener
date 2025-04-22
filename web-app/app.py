@@ -33,5 +33,15 @@ def index():
 
     return render_template("index.html")
 
+@app.route("/history")
+def view_history():
+    try:
+        response = requests.get("http://ml-client:5001/history")
+        records = response.json()
+        return render_template("history.html", records=records)
+    except Exception as e:
+        print("❌ Failed to fetch history:", e)
+        return render_template("history.html", records=[])
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
