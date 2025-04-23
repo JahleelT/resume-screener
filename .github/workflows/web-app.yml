@@ -1,21 +1,26 @@
-name: CI/CD - web-app
+name: Web-app CI/CD
 
 on:
+  # Run tests on every push or PR targeting any branch
   push:
-    branches: [ main, gilad ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - '**'
 
 jobs:
-  test:
-    name: Run tests and enforce coverage
+  build-and-test:
+    name: 🧪 Build & Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.10
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: pip install -r web-app/requirements.txt
       - name: Run pytest with coverage
@@ -26,32 +31,32 @@ jobs:
   #        coverage report --fail-under=80
 
   build-and-push:
-    name: Build and push Docker image
-    needs: test
+    name: 🚀 Build & Push Docker Image
+    needs: build-and-test
+    # Only run this job when code is pushed to main
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }} \
+            web-app
+          docker tag \
+            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push image
-        uses: docker/build-push-action@v4
-        with:
-          context: web-app
-          file: web-app/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
 
-  # deploy:
-  #   name: Deploy to DigitalOcean App Platform
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Deploy via DigitalOcean App Action
-  #       uses: digitalocean/app-action@v1
-  #       with:
-  #         spec: ./web-app/do-app-spec.yaml
-  #         token: ${{ secrets.DO_API_TOKEN }}
+      - name: Push image tags
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
