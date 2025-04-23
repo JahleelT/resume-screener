@@ -30,6 +30,7 @@ def extract_text_from_file(path):
         print("❌ Error reading PDF:", e)
         return "Resume text could not be extracted."
 
+
 def fetch_job_description(url):
     try:
         with sync_playwright() as p:
@@ -43,6 +44,7 @@ def fetch_job_description(url):
     except Exception as e:
         print("⚠️ Failed to fetch job description:", e)
         return "Job description could not be fetched."
+
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -61,7 +63,7 @@ def analyze():
     Give your response as a JSON object with three keys:
     - "summary": a short summary of the candidate
     - "suggestions": 3–5 concrete ways to improve the resume
-    - "job_focus": a bullet-style list of what the job posting emphasizes (skill sets, experience, traits)
+    - "job_focus": a bullet-style list of what the job posting emphasizes (skill sets, experience, traits). Definitely include location and salary if mentioned.
 
         Resume:
         {resume_text}
@@ -83,7 +85,7 @@ def analyze():
         "model": "gpt-4o",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 400,
-        "temperature": 0.7
+        "temperature": 0.7,
     }
 
     try:
@@ -100,8 +102,9 @@ def analyze():
         if raw_output.startswith("```"):
             raw_output = re.sub(r"^```(?:json)?\s*", "", raw_output)
             raw_output = re.sub(r"\s*```$", "", raw_output)
-        if (raw_output.startswith("'") and raw_output.endswith("'")) or \
-           (raw_output.startswith('"') and raw_output.endswith('"')):
+        if (raw_output.startswith("'") and raw_output.endswith("'")) or (
+            raw_output.startswith('"') and raw_output.endswith('"')
+        ):
             raw_output = raw_output[1:-1]
 
         try:
@@ -110,22 +113,14 @@ def analyze():
                 result = json.loads(m.group(0))
         except json.JSONDecodeError:
             print("❌ Failed to decode GPT output:\n", raw_output)
-            result = {
-                "summary": "GPT response could not be parsed.",
-                "suggestions": [],
-                "job_focus": []
-            }
+            result = {"summary": "GPT response could not be parsed.", "suggestions": [], "job_focus": []}
 
     except Exception as e:
         import traceback
 
         print("❌ Error communicating with OpenAI:")
         traceback.print_exc()
-        result = {
-            "summary": "OpenAI API call failed.",
-            "suggestions": [],
-            "job_focus": []
-        }
+        result = {"summary": "OpenAI API call failed.", "suggestions": [], "job_focus": []}
 
     result["job_url"] = job_url
     result["resume_path"] = resume_path
@@ -134,6 +129,7 @@ def analyze():
     result["_id"] = str(inserted.inserted_id)
 
     return jsonify(result)
+
 
 @app.route("/history", methods=["GET"])
 def history():
@@ -145,6 +141,7 @@ def history():
     except Exception as e:
         print("❌ Failed to retrieve history:", e)
         return jsonify([])
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)
