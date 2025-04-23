@@ -1,0 +1,62 @@
+name: Web-app CI/CD
+
+on:
+  # Run tests on every push or PR targeting any branch
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build-and-test:
+    name: 🧪 Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r web-app/requirements.txt
+      - name: Run pytest with coverage
+        run: |
+          cd web-app
+          pip install pytest coverage
+          coverage run -m pytest --junitxml=reports/junit.xml
+  #        coverage report --fail-under=80
+
+  build-and-push:
+    name: 🚀 Build & Push Docker Image
+    needs: build-and-test
+    # Only run this job when code is pushed to main
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }} \
+            web-app
+          docker tag \
+            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push image tags
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
