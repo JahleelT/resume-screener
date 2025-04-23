@@ -13,7 +13,7 @@ def test_analyze_missing_fields(client):
     resp = client.post("/analyze", json={})
     assert resp.status_code == 400
     data = resp.get_json()
-    assert data["error"] == "Missing resume_path or job_url"
+    assert data["error"] == "Missing resume_text or job_url"
 
 
 def test_history_returns_list(monkeypatch, client):
