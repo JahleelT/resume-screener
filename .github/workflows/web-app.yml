@@ -1,0 +1,57 @@
+name: CI/CD - web-app
+
+on:
+  push:
+    branches: [ main, gilad ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run tests and enforce coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r web-app/requirements.txt
+      - name: Run pytest with coverage
+        run: |
+          cd web-app
+          pip install pytest coverage
+          coverage run -m pytest --junitxml=reports/junit.xml
+  #        coverage report --fail-under=80
+
+  build-and-push:
+    name: Build and push Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: web-app
+          file: web-app/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
+
+  # deploy:
+  #   name: Deploy to DigitalOcean App Platform
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy via DigitalOcean App Action
+  #       uses: digitalocean/app-action@v1
+  #       with:
+  #         spec: ./web-app/do-app-spec.yaml
+  #         token: ${{ secrets.DO_API_TOKEN }}
