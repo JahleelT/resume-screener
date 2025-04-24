@@ -1,0 +1,68 @@
+name: resume-screener
+region: sfo
+
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
+envs:
+  - key: OPENAI_API_KEY
+    value: ${OPENAI_API_KEY}
+    type: SECRET
+    scope: RUN_AND_BUILD_TIME
+  - key: MONGO_URI
+    value: ${MONGO_URI}
+    type: SECRET
+    scope: RUN_AND_BUILD_TIME
+  - key: ML_CLIENT_HOST
+    value: http://gbs-4189-ml-client:5001
+    scope: RUN_AND_BUILD_TIME
+
+features:
+  - buildpack-stack=ubuntu-22
+
+ingress:
+  rules:
+    - component:
+        name: gbs-4189-web-app
+      match:
+        path:
+          prefix: /
+
+services:
+  - name: gbs-4189-ml-client
+    image:
+      registry_type: DOCKER_HUB
+      registry: gbs4189
+      repository: ml-client
+      tag: latest
+    run_command: python app.py
+    internal_ports:
+      - 5001
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    health_check:
+      port: 5001
+      initial_delay_seconds: 5
+      timeout_seconds: 5
+      period_seconds: 5
+      success_threshold: 1
+      failure_threshold: 6
+
+  - name: gbs-4189-web-app
+    image:
+      registry_type: DOCKER_HUB
+      registry: gbs4189
+      repository: web-app
+      tag: latest
+    http_port: 5000
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    health_check:
+      http_path: /
+      port: 5000
+      initial_delay_seconds: 5
+      timeout_seconds: 5
+      period_seconds: 5
+      success_threshold: 1
+      failure_threshold: 5
