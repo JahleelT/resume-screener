@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template
 import requests
 import fitz  # PyMuPDF for PDF text extraction
+import os
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def index():
 
         # Send extracted text to ml-client
         payload = {"resume_text": resume_text, "job_url": job_url}
-        response = requests.post("http://ml-client:5001/analyze", json=payload)
+        response = requests.post(f"{os.getenv('ML_CLIENT_HOST')}/analyze", json=payload)
 
         try:
             result = response.json()
@@ -51,7 +52,7 @@ def index():
 @app.route("/history")
 def view_history():
     try:
-        response = requests.get("http://ml-client:5001/history")
+        response = requests.get(f"{os.getenv('ML_CLIENT_HOST')}/history")
         records = response.json()
         return render_template("history.html", records=records)
     except Exception as e:

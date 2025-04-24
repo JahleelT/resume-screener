@@ -4,7 +4,9 @@ import os
 import json
 import re
 from dotenv import load_dotenv
-from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
 from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
@@ -12,7 +14,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # MongoDB setup
-mongo = MongoClient("mongodb://mongo:27017/")
+mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db = mongo["resume_db"]
 collection = db["analyses"]
 
