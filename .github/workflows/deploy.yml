@@ -1,0 +1,27 @@
+name: Deploy to DO Apps
+
+on:
+  workflow_run:
+    workflows:
+      - Build & Push web-app
+      - Build & Push ml-client
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: 🚀 Deploy via spec.yaml
+        run: |
+          doctl apps update ${{ secrets.DO_APP_ID }} --spec spec.yaml
