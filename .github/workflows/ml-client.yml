@@ -1,0 +1,82 @@
+name: ML-client CI/CD
+
+on:
+  # Run tests on every push or PR targeting any branch
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build-and-test:
+    name: 🧪 Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Install dependencies
+        run: pip install -r ml-client/requirements.txt && playwright install --with-deps
+      
+      - name: 🔍 Run pytest with coverage
+        run: |
+          cd ml-client
+          pip install pytest coverage
+          coverage run -m pytest --junitxml=reports/junit.xml
+ #         coverage report --fail-under=80
+          
+  build-and-push:
+    name: 📤 Build & Push Docker Image
+    needs: build-and-test
+    # Only run this job when code is pushed to main
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 🔨 Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/ml-client:${{ github.sha }} \
+            ml-client
+          docker tag \
+            ${{ secrets.DOCKERHUB_USERNAME }}/ml-client:${{ github.sha }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/ml-client:latest
+
+      - name: 🔐 Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 📤 Push image tags
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ml-client:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ml-client:latest
+
+
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔧 Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: 🚀 Deploy via spec.yaml
+        run: |
+          doctl apps update ${{ secrets.DO_APP_ID }} --spec spec.yaml

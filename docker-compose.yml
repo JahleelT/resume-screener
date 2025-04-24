@@ -11,8 +11,8 @@ services:
     build: ./web-app
     ports:
       - "5050:5000"
-    volumes:
-      - shared_data:/shared/resumes
+    env_file:
+      - ./web-app/.env
     depends_on:
       - ml-client
       - mongo
@@ -21,8 +21,6 @@ services:
     build: ./ml-client
     ports:
       - "5001:5001"
-    volumes:
-      - shared_data:/shared/resumes
     env_file:
       - ./ml-client/.env
     depends_on:
