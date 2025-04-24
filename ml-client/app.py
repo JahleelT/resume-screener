@@ -108,15 +108,11 @@ Respond with only the raw JSON object. No commentary or formatting. Format exact
 
     # Attach metadata
     result["job_url"] = job_url
+    db_record = result.copy()
+    inserted = collection.insert_one(db_record)
+    db_record["_id"] = str(inserted.inserted_id)
 
-    # Persist to MongoDB
-    try:
-        inserted = collection.insert_one(result)
-        result["_id"] = str(inserted.inserted_id)
-    except Exception as e:
-        print("❌ Failed to save analysis to DB:", e)
-
-    return jsonify(result)
+    return jsonify(db_record)
 
 
 @app.route("/history", methods=["GET"])
