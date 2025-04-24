@@ -6,7 +6,8 @@ import re
 from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-
+from flask.json.provider import DefaultJSONProvider
+from bson import ObjectId
 from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
@@ -17,6 +18,16 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db = mongo["resume_db"]
 collection = db["analyses"]
+
+
+class MongoJSONProvider(DefaultJSONProvider):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return super().default(o)
+
+
+app.json = MongoJSONProvider(app)
 
 
 def fetch_job_description(url):

@@ -2,8 +2,20 @@ from flask import Flask, request, render_template
 import requests
 import fitz  # PyMuPDF for PDF text extraction
 import os
+from flask.json.provider import DefaultJSONProvider
+from bson import ObjectId
 
 app = Flask(__name__)
+
+
+class MongoJSONProvider(DefaultJSONProvider):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return super().default(o)
+
+
+app.json = MongoJSONProvider(app)
 
 
 def extract_text_from_stream(file_stream):
