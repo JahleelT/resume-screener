@@ -62,3 +62,15 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
+
+
+  deploy:
+      needs: build-and-push
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploy to DigitalOcean App Platform
+          uses: digitalocean/app-action@v2
+          with:
+            app_id: ${{ secrets.DO_APP_ID }}
+            spec: spec.yaml
+            token: ${{ secrets.DO_API_TOKEN }}
