@@ -17,6 +17,9 @@ envs:
   - key: ML_CLIENT_HOST
     value: http://gbs-4189-ml-client:5001
     scope: RUN_AND_BUILD_TIME
+  - key: SECRET_KEY
+    value: ${SECRET_KEY}
+    type: SECRET
 
 features:
   - buildpack-stack=ubuntu-22
