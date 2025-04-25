@@ -1,26 +1,69 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Past Analyses</title>
-</head>
-<body>
-  <h1>Previous Resume Analyses</h1>
-  <ul>
-    {% for record in records %}
+  <head>
+    <title>Past Analyses</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        color: #333;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #1d3557;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #ddd;
+      }
+      .summary {
+        margin-bottom: 0.5rem;
+      }
+      a.button {
+        display: inline-block;
+        margin-top: 0.25rem;
+        padding: 0.5rem 1rem;
+        background-color: #1d3557;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+      a.button:hover {
+        background-color: #457b9d;
+      }
+      .back-link {
+        display: block;
+        margin-top: 2rem;
+        color: #457b9d;
+        text-decoration: none;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Previous Resume Analyses</h1>
+    <ul>
+      {% for record in records %}
       <li>
-        <strong>Job URL:</strong> {{ record.job_url }}<br/>
-        <strong>Resume File:</strong> {{ record.resume_path }}<br/>
-        <strong>Summary:</strong> {{ record.summary }}<br/>
-        <strong>Suggestions:</strong>
-        <ul>
-          {% for s in record.suggestions %}
-            <li>{{ s }}</li>
-          {% endfor %}
-        </ul>
-        <hr/>
+        <p class="summary">{{ record.summary }}</p>
+        <a href="{{ url_for('job', job_id=record._id) }}" class="button"
+          >View Full Analysis</a
+        >
       </li>
-    {% endfor %}
-  </ul>
-  <a href="/">Back to Home</a>
-</body>
+      {% endfor %}
+    </ul>
+    <a href="/" class="back-link">&larr; Back to Home</a>
+  </body>
 </html>
