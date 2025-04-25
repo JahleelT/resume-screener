@@ -77,4 +77,4 @@ jobs:
 
       - name: 🚀 Deploy via spec.yaml
         run: |
-          doctl apps update ${{ secrets.DO_APP_ID }} --spec spec.yaml --force-rebuild
+          doctl apps update ${{ secrets.DO_APP_ID }} --spec spec.yaml --update-sources
