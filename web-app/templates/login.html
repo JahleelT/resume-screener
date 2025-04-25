@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In</title>
+    <style>
+      /* Page background */
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f4f7fa;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      /* Form card */
+      .card {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 400px;
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: #333;
+      }
+
+      label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #555;
+      }
+
+      input {
+        padding: 0.75rem;
+        border: 1px solid #ccd0d5;
+        border-radius: 4px;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 1.25rem;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #4285f4;
+      }
+
+      .flash-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1rem;
+      }
+
+      .flash-list li {
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .flash-list li.success {
+        background: #e6f4ea;
+        color: #1e4620;
+      }
+
+      .flash-list li.error {
+        background: #fbeaea;
+        color: #611a15;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        background: #4285f4;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #3367d6;
+      }
+
+      p {
+        text-align: center;
+        margin-top: 1.25rem;
+        font-size: 0.95rem;
+      }
+
+      a {
+        color: #4285f4;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Log In</h1>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <ul class="flash-list">
+        {% for category, msg in messages %}
+        <li class="{{ 'error' if category=='danger' else 'success' }}">
+          {{ msg }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+      <form method="POST">
+        <label for="username">Username</label>
+        <input name="username" id="username" required />
+
+        <label for="password">Password</label>
+        <input name="password" id="password" type="password" required />
+
+        <button type="submit">Log In</button>
+      </form>
+      <p>
+        Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
+      </p>
+    </div>
+  </body>
+</html>

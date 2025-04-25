@@ -3,21 +3,17 @@ import requests
 import os
 import json
 import re
-from dotenv import load_dotenv
+from threading import Thread
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from flask.json.provider import DefaultJSONProvider
 from bson import ObjectId
+from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
-app = Flask(__name__)
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# MongoDB setup
-mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
-db = mongo["resume_db"]
-collection = db["analyses"]
+title_app = Flask(__name__)
 
 
 class MongoJSONProvider(DefaultJSONProvider):
@@ -27,13 +23,15 @@ class MongoJSONProvider(DefaultJSONProvider):
         return super().default(o)
 
 
+app = Flask(__name__)
 app.json = MongoJSONProvider(app)
+
+mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
+db = mongo["resume_db"]
+collection = db["analyses"]
 
 
 def fetch_job_description(url):
-    """
-    Uses Playwright to scrape the job description text from the given URL.
-    """
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -48,40 +46,31 @@ def fetch_job_description(url):
         return "Job description could not be fetched."
 
 
-@app.route("/analyze", methods=["POST"])
-def analyze():
-    data = request.get_json(force=True)
-    resume_text = data.get("resume_text")
-    job_url = data.get("job_url")
-
-    if not resume_text or not job_url:
-        return jsonify({"error": "Missing resume_text or job_url"}), 400
-
-    # Fetch job description separately
-    job_description = fetch_job_description(job_url)
-
-    # Build prompt for OpenAI
-    prompt = f"""
+def build_prompt(resume_text, job_desc):
+    return f"""
 You're a resume screener. Compare the resume and job description below.
 Give your response as a JSON object with three keys:
-- "summary": a short summary of the candidate
-- "suggestions": 3–5 concrete ways to improve the resume
-- "job_focus": a bullet-style list of what the job posting emphasizes (skill sets, experience, traits). Definitely include location and salary if mentioned.
+- \"summary\": a short summary of the candidate
+- \"suggestions\": 3–5 concrete ways to improve the resume
+- \"job_focus\": a bullet-style list of what the job posting emphasizes.
 
 Resume:
 {resume_text}
 
 Job Description:
-{job_description}
+{job_desc}
 
-Respond with only the raw JSON object. No commentary or formatting. Format exactly like:
+Respond with only the raw JSON object:
 {{
 "summary": "...",
-"suggestions": ["...", "..."],
-"job_focus": ["...", "..."]
+"suggestions": ["..."],
+"job_focus": ["..."]
 }}
 """
 
+
+def call_openai(prompt):
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "gpt-4o",
@@ -89,53 +78,51 @@ Respond with only the raw JSON object. No commentary or formatting. Format exact
         "max_tokens": 400,
         "temperature": 0.7,
     }
-
-    try:
-        gpt_response = requests.post(
-            "https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=30
-        )
-        gpt_response.raise_for_status()
-        raw_output = gpt_response.json()["choices"][0]["message"]["content"].strip()
-
-        # Strip Markdown fences if present
-        if raw_output.startswith("```"):
-            raw_output = re.sub(r"^```(?:json)?\s*", "", raw_output)
-            raw_output = re.sub(r"\s*```$", "", raw_output)
-        # Strip surrounding quotes
-        if (raw_output.startswith("'") and raw_output.endswith("'")) or (
-            raw_output.startswith('"') and raw_output.endswith('"')
-        ):
-            raw_output = raw_output[1:-1]
-
-        # Extract JSON object
-        match = re.search(r"\{.*\}", raw_output, re.DOTALL)
-        if match:
-            result = json.loads(match.group(0))
-        else:
-            raise ValueError("Could not locate JSON in GPT output")
-    except Exception as e:
-        print("❌ Error during OpenAI processing:", e)
-        result = {"summary": "An error occurred during analysis.", "suggestions": [], "job_focus": []}
-
-    # Attach metadata
-    result["job_url"] = job_url
-    db_record = result.copy()
-    inserted = collection.insert_one(db_record)
-    db_record["_id"] = str(inserted.inserted_id)
-
-    return jsonify(db_record)
+    r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=30)
+    r.raise_for_status()
+    raw = r.json()["choices"][0]["message"]["content"].strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+    if (raw.startswith("'") and raw.endswith("'")) or (raw.startswith('"') and raw.endswith('"')):
+        raw = raw[1:-1]
+    match = re.search(r"\{.*\}", raw, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+    raise ValueError("Could not parse OpenAI response as JSON")
 
 
-@app.route("/history", methods=["GET"])
-def history():
-    try:
-        records = list(collection.find().sort("_id", -1).limit(10))
-        for r in records:
-            r["_id"] = str(r["_id"])
-        return jsonify(records)
-    except Exception as e:
-        print("❌ Failed to retrieve history:", e)
-        return jsonify([])
+@app.route("/process", methods=["POST"])
+def process():
+    data = request.get_json(force=True)
+    job_id = data.get("id")
+    if not job_id:
+        return jsonify({"error": "missing id"}), 400
+
+    Thread(target=do_work, args=(job_id,), daemon=True).start()
+    return jsonify({"status": "started"}), 202
+
+
+def do_work(job_id):
+    rec = collection.find_one({"_id": ObjectId(job_id)})
+    if not rec:
+        return
+    collection.update_one({"_id": ObjectId(job_id)}, {"$set": {"status": "processing"}})
+
+    jd = fetch_job_description(rec["job_url"])
+    result = call_openai(build_prompt(rec["resume_text"], jd))
+
+    collection.update_one(
+        {"_id": ObjectId(job_id)},
+        {
+            "$set": {
+                "status": "complete",
+                "summary": result["summary"],
+                "suggestions": result["suggestions"],
+                "job_focus": result["job_focus"],
+            }
+        },
+    )
 
 
 if __name__ == "__main__":

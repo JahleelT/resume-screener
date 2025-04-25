@@ -57,7 +57,11 @@
       <form action="/" method="get" style="display: inline">
         <button type="submit">⬅ Submit Another Comparison</button>
       </form>
-      <a href="/history">🔍 View Past Analyses</a>
+      {% if current_user.is_authenticated %}
+      <p class="link-container">
+        <a href="/history">🔍 View Past Analyses</a>
+      </p>
+      {% endif %}
     </div>
   </body>
 </html>
