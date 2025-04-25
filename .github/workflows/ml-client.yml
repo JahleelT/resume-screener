@@ -1,7 +1,6 @@
 name: ML-client CI/CD
 
 on:
-  # Run tests on every push or PR targeting any branch
   push:
     branches:
       - '**'
@@ -35,7 +34,6 @@ jobs:
   build-and-push:
     name: 📤 Build & Push Docker Image
     needs: build-and-test
-    # Only run this job when code is pushed to main
     if: >
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main'

@@ -13,7 +13,6 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-# JSON provider for ObjectId
 title_app = Flask(__name__)
 
 
@@ -27,7 +26,6 @@ class MongoJSONProvider(DefaultJSONProvider):
 app = Flask(__name__)
 app.json = MongoJSONProvider(app)
 
-# MongoDB
 mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db = mongo["resume_db"]
 collection = db["analyses"]

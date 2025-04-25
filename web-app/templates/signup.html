@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <style>
+      /* you can copy your index.html styles or add your own */
+      body {
+        font-family: system-ui;
+        padding: 2rem;
+        max-width: 400px;
+        margin: auto;
+      }
+      label,
+      input {
+        display: block;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+      button {
+        padding: 0.5rem 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Create an Account</h1>
+    <form method="POST">
+      <label for="username">Username</label>
+      <input name="username" id="username" required />
+
+      <label for="password">Password</label>
+      <input name="password" id="password" type="password" required />
+
+      <button type="submit">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+  </body>
+</html>
