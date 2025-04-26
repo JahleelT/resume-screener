@@ -2,12 +2,146 @@
 <html>
 <head>
   <title>Past Analyses</title>
+  <style>
+    :root {
+        --light: #ffffffff;
+        --danger: #dc3545ff;
+        --success: #28a745ff;
+        --secondary: #457b9dff;
+        --tertiary: #868C98;
+        --primary: #1d3557ff;
+        --dark: #000000ff;
+      }
+
+      * {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background-color: var(--light);
+        color: var(--dark);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 48px 24px;
+        overflow-y: auto;
+      }
+      
+      h1 {
+        font-size: 3rem;
+        line-height: 1.2;
+      }
+
+      h2 {
+        font-size: 2.25rem;
+        margin-bottom: 16px;
+      }
+
+      p, ul {
+        font-size: 1.25rem;
+        line-height: 1.5;
+      }
+
+      li {
+        margin-bottom: 0.75rem;
+        color: var(--secondary);
+      }
+
+      h1 {
+        position: relative;
+        display: inline-block;
+        padding-bottom: 8px;
+        margin-bottom: 24px;
+        font-weight: 700;
+        font-size: 2.5rem;
+        color: var(--primary);
+      }
+
+      h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: var(--secondary);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.4s ease-in-out, background-color 0.3s ease;
+      }
+
+      h1:hover::after {
+        background-color: var(--dark);
+        transform: scaleX(1);
+      }
+
+      @keyframes fadeSlideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      section.result-card {
+        background-color: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 40px;
+        margin-bottom: 40px;
+        max-width: 900px;
+        width: 100%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+        animation: fadeSlideUp 0.6s ease forwards;
+      }
+
+      section.result-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-4px);
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+
+      li {
+        margin-bottom: 0.5rem;
+        color: var(--secondary);
+      }
+
+      a {
+        margin-top: 24px;
+        font-size: 1rem;
+      }
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      a:hover {
+        color: var(--secondary);
+        text-decoration: underline;
+      }
+
+  </style>
 </head>
 <body>
   <h1>Previous Resume Analyses</h1>
   <ul>
     {% for record in records %}
-      <li>
+      <section class="result-card">
         <strong>Job URL:</strong> {{ record.job_url }}<br/>
         <strong>Resume File:</strong> {{ record.resume_path }}<br/>
         <strong>Summary:</strong> {{ record.summary }}<br/>
@@ -18,7 +152,7 @@
           {% endfor %}
         </ul>
         <hr/>
-      </li>
+      </section>
     {% endfor %}
   </ul>
   <a href="/">Back to Home</a>

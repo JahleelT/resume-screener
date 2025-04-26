@@ -55,11 +55,10 @@ def index():
             result = response.json()
         except requests.exceptions.JSONDecodeError:
             return "ML client did not return valid JSON", 500
-
+        
         return render_template("result.html", result=result)
-
+    print("📥 / route accessed")
     return render_template("index.html")
-
 
 @app.route("/history")
 def view_history():
@@ -70,7 +69,6 @@ def view_history():
     except Exception as e:
         print("❌ Failed to fetch history:", e)
         return render_template("history.html", records=[])
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
