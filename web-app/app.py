@@ -128,43 +128,6 @@ def job(job_id):
 def history():
     if not current_user.is_authenticated:
         return render_template("history.html", records=[])
-    query = {"user_id": ObjectId(current_user.id)}
-    records = list(collection.find(query).sort("_id", -1).limit(10))
-    for r in records:
-        r["_id"] = str(r["_id"])
-    return render_template("history.html", records=records)
-
-
-from werkzeug.security import generate_password_hash, check_password_hash
-
-
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-    if request.method == "POST":
-        u = request.form["username"]
-        p = generate_password_hash(request.form["password"])
-        mongo[db_name]["users"].insert_one({"username": u, "password": p})
-        return redirect(url_for("login"))
-    return render_template("signup.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        u = request.form["username"]
-        doc = mongo[db_name]["users"].find_one({"username": u})
-        if doc and check_password_hash(doc["password"], request.form["password"]):
-            login_user(User(doc))
-            return redirect(url_for("index"))
-        flash("Invalid credentials", "danger")
-    return render_template("login.html")
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
