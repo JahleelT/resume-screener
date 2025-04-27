@@ -47,8 +47,7 @@ ML_CLIENT_HOST=http://ml-client:5001
 
 ```env
 OPENAI_API_KEY=sk-xxxxxx
-SECRET_KEY=your_secret_key
-ML_CLIENT_HOST=http://ml-client:5001
+MONGO_URI=mongodb://mongo:27017/resume_db
 ```
 
 4. After copying, rename to `.env` and replace dummy values, including the OpenAI Key, with your own.
