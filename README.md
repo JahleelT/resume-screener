@@ -11,7 +11,7 @@ A two-subsystem application that leverages AI to compare your resume against a j
 ## Teammates
 
 - [Gilad](https://github.com/giladspitzer)
-- [Andly](https://github.com/andy-612)
+- [Andy](https://github.com/andy-612)
 - [Jahleel](https://github.com/JahleelT)
 - [Matthew](https://github.com/bruhcolate)
 
