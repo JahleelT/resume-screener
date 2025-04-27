@@ -34,17 +34,24 @@ A two-subsystem application that leverages AI to compare your resume against a j
 
 ## Environment Variables
 
-Create a `.env` file in each subsystem directory (`web-app/` and `ml-client/`) based on the provided `.env.example`:
+1. Create a `.env` file in each subsystem directory (`web-app/` and `ml-client/`) based on the provided `.env.example`.
+2. Inside the `.env` file in `web-app/`, include:
 
 ```env
-# web-app/.env.example and ml-client/.env.example
-OPENAI_API_KEY=sk-xxxxxx
-MONGO_URI=mongodb://localhost:27017/resume_db
+MONGO_URI=mongodb://mongo:27017/resume_db
 SECRET_KEY=your_secret_key
-ML_CLIENT_HOST=http://ml-client:5001   # For web-app only
+ML_CLIENT_HOST=http://ml-client:5001
 ```
 
-After copying, rename to `.env` and replace dummy values with your own.
+3. Inside the `.env` file in `ml-client/`, include:
+
+```env
+OPENAI_API_KEY=sk-xxxxxx
+SECRET_KEY=your_secret_key
+ML_CLIENT_HOST=http://ml-client:5001
+```
+
+4. After copying, rename to `.env` and replace dummy values, including the OpenAI Key, with your own.
 
 ## Setup & Run Locally
 
@@ -94,4 +101,3 @@ We deploy to DigitalOcean via GitHub Actions. Configuration is defined in `spec.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
