@@ -57,7 +57,6 @@ MONGO_URI=mongodb://mongo:27017/resume_db
 1. Clone the repository:
    ```bash
    git clone https://github.com/software-students-spring2025/5-final-finalone.git
-   cd resume-screener
    ```
 2. Copy `env.example` to `.env` in both `web-app/` and `ml-client/`, then update values.
 3. Build and start services with Docker Compose:
