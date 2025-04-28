@@ -106,12 +106,18 @@ def process():
 def do_work(job_id):
     rec = collection.find_one({"_id": ObjectId(job_id)})
     if not rec:
+        print(f"Job with id {job_id} not found in the database.")
         return
+    print(f"Updating status to 'processing' for job_id: {job_id}")
     collection.update_one({"_id": ObjectId(job_id)}, {"$set": {"status": "processing"}})
 
     jd = fetch_job_description(rec["job_url"])
-    result = call_openai(build_prompt(rec["resume_text"], jd))
+    print(f"Fetched job description for job_id: {job_id}")
 
+    result = call_openai(build_prompt(rec["resume_text"], jd))
+    print(f"OpenAI result: {result}")
+
+    print(f"Updating MongoDB to 'complete' for job_id: {job_id}")
     collection.update_one(
         {"_id": ObjectId(job_id)},
         {
@@ -123,6 +129,7 @@ def do_work(job_id):
             }
         },
     )
+    print(f"Job {job_id} has been processed and status updated to 'complete'.")
 
 
 if __name__ == "__main__":
