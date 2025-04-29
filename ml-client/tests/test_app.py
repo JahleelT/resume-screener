@@ -1,5 +1,5 @@
-from unittest.mock import patch
-from app import do_work
+from unittest.mock import patch, MagicMock
+from app import do_work, build_prompt, fetch_job_description, app
 import pytest
 from app import app
 from bson import ObjectId
@@ -49,7 +49,7 @@ def test_fetch_job_description_fails():
             with patch("app.fetch_job_description", side_effect=Exception("Fetch failed")):
                 with patch("app.call_openai") as mock_call_openai:
 
-                    # call_openai should still be called with a placeholder job desc
+                    # call_openai should still be called with a placeholder job description
                     do_work(mock_job_id)
                     assert mock_call_openai.called
                     assert mock_update.called
@@ -93,7 +93,7 @@ def test_job_status_update():
     with patch("app.collection.find_one", return_value=mock_job):
         with patch("app.collection.update_one") as mock_update:
             with patch("app.fetch_job_description", return_value="Job description content"):
-                with patch("app.call_openai", return_value={"summary": "Summary", "suggestions": "Suggestions", "job_focus": "Focus"}):
+                with patch("app.call_openai", return_value={"summary": "Summary", "suggestions": "Suggestions", "job_focus": "Job Focus"}):
 
                     do_work(mock_job_id)
 
@@ -106,7 +106,7 @@ def test_job_status_update():
                     # complete
                     mock_update.assert_any_call(
                         {"_id": mock_job_id},
-                        {"$set": {"status": "complete", "summary": "Summary", "suggestions": "Suggestions", "job_focus": "Focus"}}
+                        {"$set": {"status": "complete", "summary": "Summary", "suggestions": "Suggestions", "job_focus": "Job Focus"}}
                     )
 
 
@@ -136,12 +136,62 @@ def test_mongodb_operations():
     }
 
     with patch("app.collection.find_one", return_value=mock_job) as mock_find, \
-         patch("app.collection.update_one") as mock_update:
+         patch("app.collection.update_one") as mock_update, \
+         patch("app.call_openai", return_value={"summary": "Summary", "suggestions": "Suggestions", "job_focus": "Job Focus"}):
         
         do_work(mock_job_id)
 
         # find_one called
         mock_find.assert_called_once_with({"_id": mock_job_id})
 
-        # update_one called twice (processing and completed)
-        assert mock_update.call_count == 2
+        # ensure that all calls are made
+        mock_update.assert_any_call(
+            {"_id": mock_job_id},
+            {"$set": {"status": "processing"}}
+        )
+
+        mock_update.assert_any_call(
+            {"_id": mock_job_id},
+            {"$set": {
+                "status": "complete",
+                "summary": "Summary",
+                "suggestions": "Suggestions",
+                "job_focus": "Job Focus"
+            }}
+        )
+
+
+def test_build_prompt_format():
+    """
+    Test that the build_prompt function creates properly formatted output.
+    """
+    
+    resume = "Experienced software engineer..."
+    job = "Looking for a backend developer..."
+    prompt = build_prompt(resume, job)
+    assert "Resume:" in prompt
+    assert "Job Description:" in prompt
+    assert "summary" in prompt
+
+
+def test_call_openai_format():
+    """
+    Tests that OpenAI response is formatted correctly into JSON
+    """
+
+    # mock response data
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "choices": [{
+            "message": {
+                "content": "```json\n{\"summary\": \"X\", \"suggestions\": [\"Y\"], \"job_focus\": [\"Z\"]}\n```"
+            }
+        }]
+    }
+
+    with patch("requests.post", return_value=mock_response):
+        from app import call_openai
+        result = call_openai("fake prompt")
+        assert result["summary"] == "X"
+        assert "Y" in result["suggestions"]
