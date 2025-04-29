@@ -29,7 +29,7 @@ jobs:
           cd ml-client
           pip install pytest coverage
           coverage run -m pytest --junitxml=reports/junit.xml
- #         coverage report --fail-under=80
+          coverage report --fail-under=80
           
   build-and-push:
     name: 📤 Build & Push Docker Image
