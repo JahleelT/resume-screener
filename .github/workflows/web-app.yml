@@ -3,10 +3,10 @@ name: Web-app CI/CD
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
     branches:
-      - '**'
+      - "**"
 
 jobs:
   build-and-test:
@@ -19,17 +19,17 @@ jobs:
       - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: 📦 Install dependencies
         run: pip install -r web-app/requirements.txt
-      
+
       - name: 🔍 Run pytest with coverage
         run: |
           cd web-app
           pip install pytest coverage
           coverage run -m pytest --junitxml=reports/junit.xml
-  #        coverage report --fail-under=80
+          coverage report --fail-under=80
 
   build-and-push:
     name: 📤 Build & Push Docker Image
@@ -60,7 +60,6 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:${{ github.sha }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/web-app:latest
-
 
   deploy:
     name: 🚀 Deploy

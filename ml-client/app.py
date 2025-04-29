@@ -111,8 +111,12 @@ def do_work(job_id):
     print(f"Updating status to 'processing' for job_id: {job_id}")
     collection.update_one({"_id": ObjectId(job_id)}, {"$set": {"status": "processing"}})
 
-    jd = fetch_job_description(rec["job_url"])
-    print(f"Fetched job description for job_id: {job_id}")
+    try:
+        jd = fetch_job_description(rec["job_url"])
+        print(f"Fetched job description for job_id: {job_id}")
+    except Exception as e:
+        print(f"Failed to fetch job description for job_id {job_id}: {e}")
+        jd = "Job description not available."
 
     result = call_openai(build_prompt(rec["resume_text"], jd))
     print(f"OpenAI result: {result}")
