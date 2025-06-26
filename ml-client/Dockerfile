@@ -13,4 +13,4 @@ RUN playwright install --with-deps
 ENV PORT=10000
 EXPOSE $PORT
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:$PORT"]
+CMD gunicorn app:app --bind 0.0.0.0:$PORT
