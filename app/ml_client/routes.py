@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import request, jsonify, Blueprint
 import requests
 import os
 import json
@@ -13,18 +13,7 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-title_app = Flask(__name__)
-
-
-class MongoJSONProvider(DefaultJSONProvider):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return super().default(o)
-
-
-app = Flask(__name__)
-app.json = MongoJSONProvider(app)
+routes_bp = Blueprint("mlclient", __name__)
 
 mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db = mongo["resume_db"]
@@ -92,7 +81,7 @@ def call_openai(prompt):
     raise ValueError("Could not parse OpenAI response as JSON")
 
 
-@app.route("/process", methods=["POST"])
+@routes_bp.route("/process", methods=["POST"])
 def process():
     data = request.get_json(force=True)
     job_id = data.get("id")
@@ -108,6 +97,7 @@ def do_work(job_id):
     if not rec:
         print(f"Job with id {job_id} not found in the database.")
         return
+
     print(f"Updating status to 'processing' for job_id: {job_id}")
     collection.update_one({"_id": ObjectId(job_id)}, {"$set": {"status": "processing"}})
 
@@ -135,6 +125,7 @@ def do_work(job_id):
     )
     print(f"Job {job_id} has been processed and status updated to 'complete'.")
 
+@routes_bp.health("/health")
+def health():
+    return jsonify({"status": "ok"}), 200
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001)

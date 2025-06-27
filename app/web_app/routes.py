@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, Blueprint, abort, flash, redirect, url_for, request, render_template, jsonify
 import requests
 import os
 from threading import Thread
@@ -8,35 +8,30 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from flask.json.provider import DefaultJSONProvider
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
-from flask import flash, redirect, url_for, abort
 import fitz
+from werkzeug.security import generate_password_hash, check_password_hash
+from app.login import login_manager
 
+frontend_bp = Blueprint('frontend', __name__)
 
-class MongoJSONProvider(DefaultJSONProvider):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return super().default(o)
-
-
-app = Flask(__name__)
-app.json = MongoJSONProvider(app)
-app.secret_key = os.getenv("SECRET_KEY", "dev-change-me-to-a-real-secret")
 
 mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db_name = "resume_db"
 db = mongo[db_name]
 collection = db["analyses"]
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
+
 
 
 class User(UserMixin):
     def __init__(self, mongo_doc):
         self.id = str(mongo_doc["_id"])
         self.username = mongo_doc["username"]
+
+@frontend_bp.record_once
+def on_load(state):
+    login_manager.init_app(state.app)
+    login_manager.login_view = "frontend.login"
 
 
 @login_manager.user_loader
@@ -46,7 +41,6 @@ def load_user(user_id):
 
 
 def extract_text_from_stream(file_stream):
-
     try:
         pdf_bytes = file_stream.read()
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -54,10 +48,10 @@ def extract_text_from_stream(file_stream):
         return text.strip()[:3000]
     except Exception as e:
         print("❌ Error extracting text from PDF:", e)
-        return "Resume text could not be extracted."
+        return "Error: Resume text could not be extracted."
 
 
-@app.route("/", methods=["GET", "POST"])
+@frontend_bp.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         resume = request.files.get("resume")
@@ -91,7 +85,7 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/status/<job_id>")
+@frontend_bp.route("/status/<job_id>")
 def status(job_id):
     rec = collection.find_one({"_id": ObjectId(job_id)})
     if not rec:
@@ -108,7 +102,7 @@ def status(job_id):
     return jsonify({"status": "complete"})
 
 
-@app.route("/job/<job_id>")
+@frontend_bp.route("/job/<job_id>")
 def job(job_id):
     rec = collection.find_one({"_id": ObjectId(job_id)})
     if not rec:
@@ -124,7 +118,7 @@ def job(job_id):
     return render_template("result.html", result=rec)
 
 
-@app.route("/history")
+@frontend_bp.route("/history")
 def history():
     if not current_user.is_authenticated:
         return render_template("history.html", records=[])
@@ -135,37 +129,30 @@ def history():
     return render_template("history.html", records=records)
 
 
-from werkzeug.security import generate_password_hash, check_password_hash
-
-
-@app.route("/signup", methods=["GET", "POST"])
+@frontend_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
         u = request.form["username"]
         p = generate_password_hash(request.form["password"])
         mongo[db_name]["users"].insert_one({"username": u, "password": p})
-        return redirect(url_for("login"))
+        return redirect(url_for("frontend.login"))
     return render_template("signup.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
+@frontend_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         u = request.form["username"]
         doc = mongo[db_name]["users"].find_one({"username": u})
         if doc and check_password_hash(doc["password"], request.form["password"]):
             login_user(User(doc))
-            return redirect(url_for("index"))
+            return redirect(url_for("frontend.index"))
         flash("Invalid credentials", "danger")
     return render_template("login.html")
 
 
-@app.route("/logout")
+@frontend_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    return redirect(url_for("frontend.index"))
