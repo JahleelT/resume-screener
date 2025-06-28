@@ -82,16 +82,20 @@ def call_openai(prompt):
 
 @routes_bp.route("/process", methods=["POST"])
 def process():
+    print("Received /process POST")
     data = request.get_json(force=True)
     job_id = data.get("id")
     if not job_id:
         return jsonify({"error": "missing id"}), 400
 
-    Thread(target=do_work, args=(job_id,), daemon=True).start()
+    "Thread(target=do_work, args=(job_id,), daemon=True).start()"
+    do_work(job_id)
     return jsonify({"status": "started"}), 202
 
 
 def do_work(job_id):
+    print(f" Running do_work for job_id: {job_id}")
+
     rec = collection.find_one({"_id": ObjectId(job_id)})
     if not rec:
         print(f"Job with id {job_id} not found in the database.")
