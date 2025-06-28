@@ -6,7 +6,6 @@ import re
 from threading import Thread
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from flask.json.provider import DefaultJSONProvider
 from bson import ObjectId
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -125,7 +124,7 @@ def do_work(job_id):
     )
     print(f"Job {job_id} has been processed and status updated to 'complete'.")
 
-@routes_bp.health("/health")
+@routes_bp.route("/health")
 def health():
     return jsonify({"status": "ok"}), 200
 

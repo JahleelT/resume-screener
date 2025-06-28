@@ -207,12 +207,12 @@
     {% if current_user.is_authenticated %}
     <span>Hi, {{ current_user.username }}!</span>
     <span class="separator">|</span>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('frontend.login') }}">Logout</a>
     {% else %}
     <div class="auth-links">
-      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('frontend.login') }}">Login</a>
       <span class="separator">|</span>
-      <a href="{{ url_for('signup') }}">Sign up</a>
+      <a href="{{ url_for('frontend.login') }}">Sign up</a>
     </div>
     {% endif %}
   </nav>

@@ -10,35 +10,28 @@ from flask.json.provider import DefaultJSONProvider
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
 import fitz
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.login import login_manager
+from login import login_manager
 
-frontend_bp = Blueprint('frontend', __name__)
-
+frontend_bp = Blueprint(
+    'frontend', 
+    __name__,
+    template_folder='templates',
+    )
 
 mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
 db_name = "resume_db"
 db = mongo[db_name]
 collection = db["analyses"]
 
-
-
-
 class User(UserMixin):
     def __init__(self, mongo_doc):
         self.id = str(mongo_doc["_id"])
         self.username = mongo_doc["username"]
 
-@frontend_bp.record_once
-def on_load(state):
-    login_manager.init_app(state.app)
-    login_manager.login_view = "frontend.login"
-
-
 @login_manager.user_loader
 def load_user(user_id):
     doc = mongo[db_name]["users"].find_one({"_id": ObjectId(user_id)})
     return User(doc) if doc else None
-
 
 def extract_text_from_stream(file_stream):
     try:
@@ -50,14 +43,14 @@ def extract_text_from_stream(file_stream):
         print("❌ Error extracting text from PDF:", e)
         return "Error: Resume text could not be extracted."
 
-
 @frontend_bp.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         resume = request.files.get("resume")
         job_url = request.form.get("job_url")
         if not resume or not job_url:
-            return "Missing fields", 400
+            flash("Please provide both a resume and job URL.", "danger")
+            return redirect(url_for("frontend.index"))
 
         resume_text = extract_text_from_stream(resume.stream)
 
@@ -84,7 +77,6 @@ def index():
 
     return render_template("index.html")
 
-
 @frontend_bp.route("/status/<job_id>")
 def status(job_id):
     rec = collection.find_one({"_id": ObjectId(job_id)})
@@ -101,7 +93,6 @@ def status(job_id):
         return jsonify({"status": "pending"})
     return jsonify({"status": "complete"})
 
-
 @frontend_bp.route("/job/<job_id>")
 def job(job_id):
     rec = collection.find_one({"_id": ObjectId(job_id)})
@@ -117,7 +108,6 @@ def job(job_id):
         return jsonify({"status": "pending"})
     return render_template("result.html", result=rec)
 
-
 @frontend_bp.route("/history")
 def history():
     if not current_user.is_authenticated:
@@ -128,7 +118,6 @@ def history():
         r["_id"] = str(r["_id"])
     return render_template("history.html", records=records)
 
-
 @frontend_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -137,7 +126,6 @@ def signup():
         mongo[db_name]["users"].insert_one({"username": u, "password": p})
         return redirect(url_for("frontend.login"))
     return render_template("signup.html")
-
 
 @frontend_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -149,7 +137,6 @@ def login():
             return redirect(url_for("frontend.index"))
         flash("Invalid credentials", "danger")
     return render_template("login.html")
-
 
 @frontend_bp.route("/logout")
 @login_required
