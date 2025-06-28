@@ -16,8 +16,14 @@ COPY . .
 # Install Playwright 
 RUN playwright install
 
+# Install gunicorn
+RUN pip install gunicorn
+
+# Set Production Environment
+ENV FLASK_ENV=production
+
 # Expose port
 EXPOSE 5000
 
 # Start the app 
-CMD ["python", "-u", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
