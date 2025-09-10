@@ -1,23 +1,12 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify
 import requests
 import os
 import json
 import re
 from threading import Thread
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-from bson import ObjectId
-from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
-
-load_dotenv()
-
-routes_bp = Blueprint("mlclient", __name__)
-
-mongo = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
-db = mongo["resume_db"]
-collection = db["analyses"]
-
+from .app import routes_bp
+from .db import collection
 
 def fetch_job_description(url):
     try:
