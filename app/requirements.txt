@@ -11,6 +11,12 @@ pinecone-plugin-interface==0.0.7
 langchain==0.3.27
 langchain-core==0.3.75
 langchain-text-splitters==0.3.11
+langchain-unstructured==0.1.6
+langchain-community==0.3.29
 langsmith==0.4.27
 openai==1.107.0
 tiktoken==0.11.0
+unstructured-client==0.42.3
+unstructured==0.18.14
+unstructured-inference==1.0.5
+unstructured.pytesseract==0.3.15
