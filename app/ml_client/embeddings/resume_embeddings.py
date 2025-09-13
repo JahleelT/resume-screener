@@ -17,7 +17,11 @@ def embed_chunks(chunks: list[Document]):
       {
         "id": vector_id,
         "values": vec,
-        "metadata": chunk.metadata
+        "metadata": {
+          "resume_id": resume_id,
+          "user_id" user_id,
+          **chunk.metadata
+        }
       }
     )
 
