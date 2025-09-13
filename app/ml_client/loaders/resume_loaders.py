@@ -1,31 +1,29 @@
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-def load_resume(file_path: str):
+def load_resume(file_path: str) -> list[Document]:
   if file_path.endswith(".pdf"):
     loader = UnstructuredPDFLoader(file_path)
 
-    docs = loader.load()
-
-    docs[0]
-
-    # TODO check doc and split into chunks
     
   elif file_path.endswith(".docx"):
     loader = UnstructuredWordDocumentLoader(file_path)
 
-    docs = loader.load()
-
-    docs[0]
-
-    # TODO use UnstructuredWordDocumentLoader here
-
   elif file_path.endswith(".txt"):
     loader = TextLoader(file_path)
 
-    docs = loader.load()
+  docs = loader.load()
+  return docs
 
-    docs[0]
 
-    # TODO use TextLoader here
+
+def split_resume(loaded_resume: list[Document]) -> list[Document]:
+  splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200
+  )
+
+  chunks = splitter.split_documents(loaded_resume)
+  return chunks
