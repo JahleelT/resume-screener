@@ -3,7 +3,7 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 
 embeddings = HuggingFaceBgeEmbeddings(model_name="all-MiniLM-L6-v2")
 
-def embed_chunks(chunks: list[Document]):
+def embed_chunks(chunks: list[Document], user_id: str):
   texts = [chunk.page_content for chunk in chunks]
   vectors = embeddings.embed_documents(texts)
 
@@ -26,5 +26,8 @@ def embed_chunks(chunks: list[Document]):
     )
 
   return vector_data
+
+  def embed_query(query: str) -> list[float]:
+    return embeddings.embed_documents([query])[0]
 
 
