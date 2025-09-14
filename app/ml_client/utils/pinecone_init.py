@@ -1,4 +1,5 @@
 from pinecone import Pinecone, ServerlessSpec
+from pinecone import Index
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -19,13 +20,20 @@ pc = Pinecone(api_key=pinecone_key)
 
 # Now connect to the index
 
-if not pc.has_index("resume_screener"):
-  pc.create_index(
-    name="resume_screener",
-    dimension=384,
-    metric="cosine",
-    spec=ServerlessSpec(cloud="aws", region="us-east-1")
-  )
+def begin_index(index_name: str) -> Index:
+  if not pc.has_index(index_name):
+    pc.create_index(
+      name=index_name,
+      dimension=384,
+      metric="cosine",
+      spec=ServerlessSpec(cloud="aws", region="us-east-1")
+    )
 
-index = pc.Index("resume_screener")
+  index = pc.Index(index_name)
+
+  while not pc.describe_index(index_name).status.ready:
+    time.sleep(1)
+
+  return index
+
 

@@ -1,9 +1,11 @@
-from langchain.embeddings import HuggingFaceBgeEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.schema import Document
+
 
 
 embeddings = HuggingFaceBgeEmbeddings(model_name="all-MiniLM-L6-v2")
 
-def embed_chunks(chunks: list[Document], user_id: str):
+def embed_chunks(chunks: list[Document], user_id: str) -> list[dict]:
   texts = [chunk.page_content for chunk in chunks]
   vectors = embeddings.embed_documents(texts)
 
@@ -19,7 +21,7 @@ def embed_chunks(chunks: list[Document], user_id: str):
         "values": vec,
         "metadata": {
           "resume_id": resume_id,
-          "user_id" user_id,
+          "user_id": user_id,
           **chunk.metadata
         }
       }
