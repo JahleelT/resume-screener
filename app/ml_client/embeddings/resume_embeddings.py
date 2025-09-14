@@ -22,6 +22,7 @@ def embed_chunks(chunks: list[Document], user_id: str) -> list[dict]:
         "metadata": {
           "resume_id": resume_id,
           "user_id": user_id,
+          "text": chunk.page_content,
           **chunk.metadata
         }
       }
@@ -29,7 +30,7 @@ def embed_chunks(chunks: list[Document], user_id: str) -> list[dict]:
 
   return vector_data
 
-  def embed_query(query: str) -> list[float]:
-    return embeddings.embed_documents([query])[0]
+def embed_query(query: str) -> list[float]:
+  return embeddings.embed_documents([query])[0]
 
 

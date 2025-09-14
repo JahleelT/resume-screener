@@ -20,6 +20,7 @@ def embed_chunks(chunks: list[Document], user_id: str) -> list[dict]:
         "metadata": {
           "jd_id": jd_id,
           "user_id": user_id,
+          "text": chunk.page_content,
           **chunk.metadata
         }
       }
