@@ -61,7 +61,7 @@ def query_resume_exists(index: Index, meta_filter: dict) -> bool:
   return len(results["matches"]) > 0
 
 
-def query_resume_chunks_for_jd(index: Index, resume_id: str, jd_text: str, top_k = int = 5) -> list[dict]:
+def query_resume_chunks_for_jd(index: Index, resume_id: str, jd_text: str, top_k : int = 5) -> list[dict]:
   jd_embedding = jd_embeddings.embed_query(jd_text)
 
   results = index.query(
@@ -70,7 +70,7 @@ def query_resume_chunks_for_jd(index: Index, resume_id: str, jd_text: str, top_k
     filter = {
       "resume_id": {"$eq": resume_id}
     },
-    include_metadata: True
+    include_metadata = True
   )
 
   top_chunks = []
