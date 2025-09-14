@@ -1,5 +1,6 @@
 from pinecone import Index
 from app.ml_client.embeddings import resume_embeddings
+from app.ml_client.embeddings import jd_embeddings
 
 def upsert_vectors(index: Index, vector_data: list[dict]) -> None:
   resume_id = vector_data[0]["metadata"]["resume_id"]
@@ -59,3 +60,25 @@ def query_resume_exists(index: Index, meta_filter: dict) -> bool:
   
   return len(results["matches"]) > 0
 
+
+def query_resume_chunks_for_jd(index: Index, resume_id: str, jd_text: str, top_k = int = 5) -> list[dict]:
+  jd_embedding = jd_embeddings.embed_query(jd_text)
+
+  results = index.query(
+    vector=jd_embedding,
+    top_k = top_k,
+    filter = {
+      "resume_id": {"$eq": resume_id}
+    },
+    include_metadata: True
+  )
+
+  top_chunks = []
+  for match in results["matches"]:
+    top_chunks.append({
+      "id": match["id"],
+      "text": match["metadata"].get("text", ""),
+      "metadata": match["metadata"]
+    })
+  
+  return top_chunks
