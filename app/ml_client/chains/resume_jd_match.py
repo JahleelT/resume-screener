@@ -1,7 +1,7 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
-from app.schemas.resume_jd_match import ResumeJDMatch
+from app.ml_client.schemas.resume_jd_match import ResumeJDMatch
 
 parser = PydanticOutputParser(pydantic_object=ResumeJDMatch)
 

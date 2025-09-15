@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class ExtractedResume(BaseModel):
@@ -7,4 +7,4 @@ class ExtractedResume(BaseModel):
   experiences: List[str] = Field(..., description = "List of professional experiences (titles, companies, roles, or descriptions)")
   education: List[str] = Field(..., description = "Educational background items such as degree, school, or major")
   certifications: List[str] = Field(..., description = "Professional certifications or licenses")
-  summary: List[str] = Field(..., description = "1-2 sentence summary of the candidate's background")
+  summary: str = Field(..., description = "1-2 sentence summary of the candidate's background")
