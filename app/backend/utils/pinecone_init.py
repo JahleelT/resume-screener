@@ -6,7 +6,7 @@ import os
 
 # retrieve the api_key and construct an instance of Pinecone
 
-env_path = Path(__file__).resolve().parents[2] / ".env" # go up from current (embeddings) --> backend root (ml_client) --> app root (app)
+env_path = Path(__file__).resolve().parents[2] / ".env" # go up from current (embeddings) --> backend root (backend) --> app root (app)
 load_dotenv(dotenv_path=env_path)
 
 pinecone_key = os.getenv("PINECONE_API_KEY")

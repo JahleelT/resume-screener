@@ -14,7 +14,7 @@ envs:
     value: ${MONGO_URI}
     type: SECRET
     scope: RUN_AND_BUILD_TIME
-  - key: ML_CLIENT_HOST
+  - key: backend_HOST
     value: http://gbs-4189-ml-client:5001
     scope: RUN_AND_BUILD_TIME
   - key: SECRET_KEY

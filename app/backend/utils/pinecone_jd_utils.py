@@ -1,5 +1,5 @@
 from pinecone import Index
-from app.ml_client.embeddings import jd_embeddings
+from app.backend.embeddings import jd_embeddings
 
 def upsert_vectors(index: Index, vector_data: list[dict]) -> None:
   jd_id = vector_data[0]["metadata"]["jd_id"]

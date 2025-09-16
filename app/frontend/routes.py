@@ -67,7 +67,7 @@ def index():
 
         def kick_off():
             try:
-                requests.post(f"{os.getenv('ML_CLIENT_HOST')}/process", json={"id": job_id}, timeout=5)
+                requests.post(f"{os.getenv('backend_HOST')}/process", json={"id": job_id}, timeout=5)
             except Exception:
                 pass
 

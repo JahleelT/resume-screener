@@ -1,6 +1,6 @@
 from pinecone import Index
-from app.ml_client.embeddings import resume_embeddings
-from app.ml_client.embeddings import jd_embeddings
+from app.backend.embeddings import resume_embeddings
+from app.backend.embeddings import jd_embeddings
 
 def upsert_vectors(index: Index, vector_data: list[dict]) -> None:
   resume_id = vector_data[0]["metadata"]["resume_id"]

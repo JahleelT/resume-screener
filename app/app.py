@@ -23,8 +23,8 @@ def create_app():
   login_manager.init_app(app)
   login_manager.login_view = "frontend.login"
 
-  from web_app.routes import frontend_bp
-  from ml_client.app import routes_bp
+  from frontend.routes import frontend_bp
+  from backend.app import routes_bp
   
   app.register_blueprint(frontend_bp)
   app.register_blueprint(routes_bp, url_prefix="/api")
