@@ -1,9 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, func
 from sqlalchemy.orm import relationship, declarative_base
 from backend.db import Base
 import datetime
-
-Base = declarative_base()
 
 class User(Base):
   __tablename__ = "users"
@@ -14,13 +12,39 @@ class User(Base):
   password_hash = Column(String, nullable = False)
 
   resumes = relationship("Resume", back_populates = "owner")
+  analyses = relationship("Analysis", back_populates="owner")
 
 class Resume(Base):
-  __tablename = "resumes"
+  __tablename__ = "resumes"
 
   id = Column(Integer, primary_key = True, index = True)
   user_id = Column(Integer, ForeignKey("users.id"))
   text = Column(Text)
-  created_at = Column(DateTime, default = datetime.datetime.utcnow)
+  created_at = Column(DateTime(timezone=True), server_default=func.now())
 
   owner = relationship("User", back_populates = "resumes")
+  analyses = relationship("Analysis", back_populates="resume")
+
+
+class Analysis(Base):
+  __tablename__ = "analyses"
+
+  id = Column(Integer, primary_key = True, index = True)
+
+  user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+  resume_id = Column(Integer, ForeignKey("resumes.id"), nullable=False)
+
+  jd_text = Column(Text, nullable=False)
+
+  result = Column(JSON, nullable=False)
+
+  created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+  owner = relationship("User", back_populates = "analyses")
+  resume = relationship("Resume", back_populates = "analyses")
+
+
+
+
+
+
