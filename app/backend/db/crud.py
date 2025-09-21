@@ -128,7 +128,8 @@ def delete_resume(resume_id: int):
     if resume:
       db.delete(resume)
       db.commit()
-    return None
+      return True
+    return False
   except:
     db.rollback()
     raise
