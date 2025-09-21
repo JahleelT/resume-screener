@@ -3,7 +3,7 @@ from langchain.schema import Document
 
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-def embed_chunks(chunks: list[Document], user_id: str) -> list[dict]:
+def embed_chunks(chunks: list[Document], user_id: int) -> list[dict]:
   texts = [chunk.page_content for chunk in chunks]
   vectors = embeddings.embed_documents(texts)
 
