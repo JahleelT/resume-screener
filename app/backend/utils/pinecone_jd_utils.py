@@ -27,7 +27,7 @@ def delete_vectors_by_jd(index: Index, meta_filter: dict) -> None:
     filter = pinecone_filter
   )
 
-def query_vectors(index: Index, query: str, user_id: str) -> list[dict]:
+def query_vectors(index: Index, query: str, user_id: int) -> list[dict]:
   embedded_query = jd_embeddings.embed_query(query)
 
   results = index.query(

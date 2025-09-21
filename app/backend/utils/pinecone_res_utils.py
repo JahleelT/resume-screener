@@ -31,7 +31,7 @@ def delete_vectors_by_resume(index: Index, meta_filter: dict) -> None:
   )
 
 
-def query_vectors(index: Index, query: str, user_id: str) -> list[dict]:
+def query_vectors(index: Index, query: str, user_id: int) -> list[dict]:
   embedded_query = resume_embeddings.embed_query(query)
 
   results = index.query(
