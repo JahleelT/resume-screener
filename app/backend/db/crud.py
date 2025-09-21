@@ -1,17 +1,16 @@
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session, SessionLocal
 from db.models import User, Resume, Analysis
-import bcrypt
 
 """
 Below are the User class CRUD methods
 """
 
-def create_user(email: str, password_hash: str) -> User:
+def create_user(name: str, email: str, password_hash: str) -> User:
   db = SessionLocal()
 
   try:
-    user = User(email = email, password_hash = password_hash)
+    user = User(name = name, email = email, password_hash = password_hash)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -48,7 +47,6 @@ def get_users(skip=0, limit=100):
     return result
   finally:
     db.close()
-  
 
 def update_user(user_id: int, updates: dict):
   db = SessionLocal()
@@ -57,8 +55,10 @@ def update_user(user_id: int, updates: dict):
     user = db.get(User, user_id)
     if not user: 
       return None
+    allowed_fields = {"name", "email"}
     for key, value in updates.items():
-      setattr(user, key, value)
+      if key in allowed_fields:
+        setattr(user, key, value)
     db.commit()
     db.refresh(user)
     return user
@@ -68,8 +68,6 @@ def update_user(user_id: int, updates: dict):
   finally:
     db.close()
   
-  return
-
 def delete_user(user_id: int):
   db = SessionLocal()
   try:
@@ -77,7 +75,8 @@ def delete_user(user_id: int):
     if user:
       db.delete(user)
       db.commit()
-    return None
+      return True
+    return False
   except:
     db.rollback()
     raise
@@ -119,24 +118,6 @@ def get_resumes_by_user(user_id: int):
   try:
     result = db.execute(select(Resume).where(Resume.user_id == user_id).order_by(desc(Resume.created_at))).scalars().all()
     return result
-  finally:
-    db.close()
-
-def update_resume(resume_id: int, updates: dict):
-  db = SessionLocal()
-  try:
-    resume = db.get(Resume, resume_id)
-    if not resume:
-      return None
-    
-    for key, value in updates.items():
-      setattr(resume, key, value)
-    db.commit()
-    db.refresh(resume)
-    return resume
-  except:
-    db.rollback()
-    raise
   finally:
     db.close()
 
@@ -215,7 +196,8 @@ def delete_analysis(analysis_id: int):
     if analysis:
       db.delete(analysis)
       db.commit()
-    return None
+      return True
+    return False
   except:
     db.rollback()
     raise
