@@ -133,6 +133,8 @@ def get_resume_by_filename(filename: str, user_id: int):
       )
     ).scalar_one_or_none()
     return result
+  except:
+    return None
   finally:
     db.close()
 
