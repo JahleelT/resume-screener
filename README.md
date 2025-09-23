@@ -6,18 +6,13 @@ An AI-powered application that compares your resume against a job posting and pr
 
 *** ⚠️ This project is being reworked and minorly continued by [Jahleel](https;github.com/JahleelT) ⚠️ ***
 
-
-## (Formerly) Teammates
-
-- ~~[Gilad](https://github.com/giladspitzer)~~
-- ~~[Andy](https://github.com/andy-612)~~
-- [Jahleel](https://github.com/JahleelT)
-- ~~[Matthew](https://github.com/bruhcolate)~~
+## Quick Note
+- This project was originally a group project, which can be found [here](https://github.com/software-students-spring2025/5-final-finalone), but because I have completely overhauled the backend (and soon to be frontend), their names have been removed. The original proof-of-concept project will remain at the aforementioned link.
 
 ## Table of Contents
 
 - [Resume Screener](#resume-screener)
-  - [(Formerly) Teammates](#formerly-teammates)
+  - [Quick Note](#quick-note)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [Environment Variables](#environment-variables)
