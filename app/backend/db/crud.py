@@ -87,11 +87,12 @@ def delete_user(user_id: int):
 Below are the Resume class CRUD methods
 """
 
-def create_resume(resume: dict, user_id: int) -> Resume:
+def create_resume(resume: dict, user_id: int, filename: str) -> Resume:
   db = SessionLocal()
   try:
     new_resume = Resume(
       text=resume["text"],
+      filename=filename,
       user_id = user_id
     )
     db.add(new_resume)
@@ -120,6 +121,21 @@ def get_resumes_by_user(user_id: int):
     return result
   finally:
     db.close()
+
+def get_resume_by_filename(filename: str, user_id: int):
+  db = SessionLocal()
+
+  try:
+    result = db.execute(
+      select(Resume).where(
+        Resume.filename == filename,
+        Resume.user_id == user_id
+      )
+    ).scalar_one_or_none()
+    return result
+  finally:
+    db.close()
+
 
 def delete_resume(resume_id: int):
   db = SessionLocal()
