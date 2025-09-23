@@ -1,15 +1,20 @@
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from threading import Thread
+from pinecone import Index
+import bcrypt
+import os
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+
 from .app import routes_bp
 from .db import crud
-from pinecone import Index
-from app.backend.utils.resume_jd_match_utils import match_resume_with_retrieval
 from app.backend.utils.pinecone_init import begin_index
-import bcrypt
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-
-res_index = begin_index("resumes")
-jd_index = begin_index("job_descriptions")
+from app.backend.utils.resume_jd_match_utils import match_resume_with_retrieval
+from app.backend.loaders.jd_loaders import load_jd, split_jd
+from app.backend.loaders.resume_loaders import load_resume, split_resume
+from app.backend.embeddings.jd_embeddings import embed_jd_chunks, embed_query
+from app.backend.embeddings.resume_embeddings import embed_chunks, embed_query
+from app.backend.utils import jd_pc, res_pc
 
 """
 AUTH routes
@@ -26,7 +31,7 @@ def create_user(): # TODO update parameters
     raw_password = data["password"]
     name = data["name"]
     # First salt and hash the password
-    hashed = bcrypt.hashpw(raw_password, bcrypt.gensalt(12))
+    hashed = bcrypt.hashpw(raw_password.encode("utf-8"), bcrypt.gensalt(12))
 
     try:
         new_user = crud.create_user(name, email, hashed)
@@ -105,12 +110,12 @@ def update_user():
     current_user_id = get_jwt_identity()
     data = request.get_json()
 
-    updates: dict = data["updates"]
-
     if "updates" not in data:
         return jsonify({
             "error": "There is information missing from the payload (user_id or the updates in dictionary format)"
         }), 404
+    
+    updates: dict = data["updates"]
     
     updated = crud.update_user(current_user_id, updates)
 
@@ -146,20 +151,33 @@ RESUME routes
 @routes_bp.route("/resume", methods=["POST"])
 @jwt_required
 def create_resume():
-    data = request.get_json()
+    data = request.form
     current_user_id = get_jwt_identity()
 
-    text = data["text"]
+    text = data.get("text")
 
-    if not data or "text" not in data:
+    resume_file = request.files["resume"]
+
+    if not resume_file or not text:
         return jsonify({
-            "error": "There is missing data from the payload. Please try again"
+            "error": "There is missing file or text."
         }), 400
     
-    new_resume = crud.create_resume({"text": text}, current_user_id)
+    filename = os.path.join("/tmp", secure_filename(resume_file.filename))
+    resume_file.save(filename)
+    
+    existing = crud.get_resume_by_filename(filename, current_user_id)
+
+    if existing:
+        resume_id = existing.id
+    else:
+        new_resume = crud.create_resume({"text": text}, current_user_id, filename)
+        resume_id = new_resume.id
+
+    os.remove(filename)
 
     return jsonify({
-        "text": new_resume.text
+        "resume_id": resume_id, "text": text
     }), 201
 
 
@@ -223,17 +241,50 @@ ANALYSIS routes
 def create_analysis():
     current_user_id = get_jwt_identity()
 
-    data = request.get_json()
+    resume_index = current_app.config["RESUME_INDEX"]
+    jd_index = current_app.config["JD_INDEX"]
 
-    if not data or "resume_id" not in data or "analysis_data" not in data:
+    if "resume" not in request.files or not request.form.get("url"):
         return jsonify({
-            "error": "There is information missing from the payload. Please make sure that the resume ID and analysis data are part of the payload."
+            "error": "There is information missing from the payload. Please make sure that you have sent a resume file (PDF, TXT, DOCX) and the URL to a job posting."
         }), 400
     
-    resume_id = data["resume_id"]
-    analysis_data = data["analysis_data"]
+    resume = request.files['resume']
+    filename = os.path.join("/tmp", secure_filename(resume.filename))
+    resume.save(filename)
+
+    jd_url = request.form.get('url')
+
+    res_docs = load_resume(filename)
+    jd_docs = load_jd(jd_url)
+
+    res_split = split_resume(res_docs)
+    jd_split = split_jd(jd_docs)
+
+    retrieved_resume = crud.get_resume_by_filename(filename, current_user_id)
+    jd_text = " ".join([c["text"] for c in jd_split])
+    resume_text = " ".join([d.page_content for d in res_docs])
+    if retrieved_resume:
+        resume_id = retrieved_resume.id
+    else:
+        new_resume = crud.create_resume({"text": resume_text}, current_user_id, filename)
+        resume_id = new_resume.id
+
+    try:
+        embedded_res = embed_chunks(res_split, current_user_id)
+        embedded_jd = embed_jd_chunks(jd_split, current_user_id)
+        
+        res_pc.upsert_vectors(resume_index, embedded_res)
+        jd_pc.upsert_vectors(jd_index, embedded_jd)
+
+        analysis_data = match_resume_with_retrieval(resume_index, resume_id, jd_text)
+    except:
+        return jsonify({
+            "error": "There was an error with the AI processing/pinecone. Please try again."
+        }), 409
     
     new_analysis = crud.create_analysis(analysis_data, resume_id, current_user_id)
+    os.remove(filename)
     if not new_analysis:
         return jsonify({
             "error": "failed to create analysis with the information provided. Please try again."
