@@ -1,5 +1,5 @@
 from app.backend.embeddings.resume_embeddings import embed_query
-from app.backend.utils.pinecone_res_utils import query_resume_chunks_for_jd
+from app.backend.utils.res_pc import query_resume_chunks_for_jd
 from app.backend.chains.multi_step_coordinator import run_resume_pipeline
 from pinecone import Index
 
