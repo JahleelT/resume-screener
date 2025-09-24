@@ -24,10 +24,7 @@ def create_app():
   CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-  from frontend.routes import frontend_bp
   from backend.app import routes_bp
-  
-  app.register_blueprint(frontend_bp)
   app.register_blueprint(routes_bp, url_prefix="/api")
 
   return app
