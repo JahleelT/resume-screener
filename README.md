@@ -2,17 +2,36 @@
 
 # Resume Screener
 
-An AI-powered application that compares your resume against a job posting and provides actionable feedback. Built with Flask, MongoDB, Playwright, and OpenAI's API. All logic now lives in a unified backend structure.
-
-*** ⚠️ This project is being reworked and minorly continued by [Jahleel](https;github.com/JahleelT) ⚠️ ***
+*** ⚠️ This project is being completely reworked and continued by [Jahleel](https;github.com/JahleelT) ⚠️ ***
 
 ## Quick Note
-- This project was originally a group project, which can be found [here](https://github.com/software-students-spring2025/5-final-finalone), but because I have completely overhauled the backend (and soon to be frontend), their names have been removed. The original proof-of-concept project will remain at the aforementioned link.
+- This project was originally a group project, which can be found [here](https://github.com/software-students-spring2025/5-final-finalone), but because I have completely overhauled the backend (and currently working on the frontend), their names have been removed. The original proof-of-concept project will remain at the aforementioned link.
+
+## Current Version
+- ***Frontend:***
+  - **TypeScript:** Enforces type-safety and stronger development than plain JS
+  - **React:** Creates a rich and interactive UI for an enhanced UX.
+  - **Flask-CORS:** Just for routing
+  - 
+  
+- ***Backend:***
+  - **Python:** Base language for the backend to handle endpoints, JWT auth, and orchestration of AI workflows, as well as both database interactions.
+  - **Flask:** Framework used to build the API.
+  - **LangChain:** Used to orchestrate OpenAI with various APIs
+  - **OpenAI:** Cloud-based API to access GPT 4o Mini
+  - **Vector Database (Pinecone):** Used for embedding the unstructured data (resume and job descriptions), enabling efficient similarity search and retrieval, allowing the LLM to analyze and compare content more efficiently.
+  - **SQLAlchemy:** Pythonic SQL for object relational mapping (between User, Resume, and Analysis types)
+  - **Flask-JWT-Extended:** Managing JWT auth
+
+## Former Version
+- An AI-powered application that compares your resume against a job posting and provides actionable feedback. Built with Flask, MongoDB, Playwright, and OpenAI's API. All logic now lives in a unified backend structure.
 
 ## Table of Contents
 
 - [Resume Screener](#resume-screener)
   - [Quick Note](#quick-note)
+  - [Current Version](#current-version)
+  - [Former Version](#former-version)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [Environment Variables](#environment-variables)
@@ -27,8 +46,11 @@ An AI-powered application that compares your resume against a job posting and pr
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-- A [MongoDB](https://www.mongodb.com/) instance (local or Atlas)
-- [OpenAI API Key](https://platform.openai.com/)
+- [Python 3.10+ ](https://www.python.org/downloads/)
+- [Node.js 18.20+]()
+- [PostgreSQL]()
+- [OpenAI API]()
+- [Pinecone API]()
 
 ## Environment Variables
 
