@@ -1,7 +1,7 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
-from app.backend.schemas.writer_schema import WriterOutput
+from backend.schemas.writer_schema import WriterOutput
 
 parser = PydanticOutputParser(pydantic_object = WriterOutput)
 

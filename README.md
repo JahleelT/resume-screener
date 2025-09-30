@@ -1,4 +1,4 @@
-[![Unified App CI/CD](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/app.yml/badge.svg)](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/app.yml)
+[![Unified App CI/CD](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/yml/badge.svg)](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/yml)
 
 # Resume Screener
 
@@ -38,7 +38,7 @@
   - [Setup \& Run Locally](#setup--run-locally)
   - [Docker Compose](#docker-compose)
   - [Running Tests](#running-tests)
-- [For app.py](#for-apppy)
+- [For py](#for-apppy)
   - [Container Images](#container-images)
   - [Deployment](#deployment)
   - [License](#license)
@@ -54,7 +54,7 @@
 
 ## Environment Variables
 
-1. Create a `.env` file in the `app/` directory based on the provided `.env.example`.
+1. Create a `.env` file in the ` ` directory based on the provided `.env.example`.
 2. Include the following variables:
 
 
@@ -73,12 +73,12 @@ OPENAI_API_KEY = sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx
    git clone https://github.com/JahleelT/jahleelt-resume-screener.git
    cd jahleelt-resume-screener
    ```
-2. Copy `env.example` to `.env` in `app/`, then update values.
+2. Copy `env.example` to `.env` in ` `, then update values.
 3. Build and start services with Docker Compose:
    ```bash
    docker-compose up --build
    ```
-4. Visit `http://localhost:5050` to access the Web App.
+4. Visit `http://localhost:5050` to access the Web 
 
 ## Docker Compose
 
@@ -92,7 +92,7 @@ The `docker-compose.yml` file defines:
 *** ⚠️ Tests are currently on hold until further notice as I migrate the repository from two subsystems to one unified system ⚠️ ***
 
 ```bash
-# For app.py
+# For py
 cd app
 pytest --disable-warnings -q
 

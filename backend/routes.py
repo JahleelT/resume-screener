@@ -8,13 +8,13 @@ from werkzeug.utils import secure_filename
 
 from .app import routes_bp
 from .db import crud
-from app.backend.utils.pinecone_init import begin_index
-from app.backend.utils.resume_jd_match_utils import match_resume_with_retrieval
-from app.backend.loaders.jd_loaders import load_jd, split_jd
-from app.backend.loaders.resume_loaders import load_resume, split_resume
-from app.backend.embeddings.jd_embeddings import embed_jd_chunks, embed_query
-from app.backend.embeddings.resume_embeddings import embed_chunks, embed_query
-from app.backend.utils import jd_pc, res_pc
+from backend.utils.pinecone_init import begin_index
+from backend.utils.resume_jd_match_utils import match_resume_with_retrieval
+from backend.loaders.jd_loaders import load_jd, split_jd
+from backend.loaders.resume_loaders import load_resume, split_resume
+from backend.embeddings.jd_embeddings import embed_jd_chunks, embed_query
+from backend.embeddings.resume_embeddings import embed_chunks, embed_query
+from backend.utils import jd_pc, res_pc
 
 """
 AUTH routes
@@ -241,8 +241,8 @@ ANALYSIS routes
 def create_analysis():
     current_user_id = get_jwt_identity()
 
-    resume_index = current_app.config["RESUME_INDEX"]
-    jd_index = current_app.config["JD_INDEX"]
+    resume_index = current_config["RESUME_INDEX"]
+    jd_index = current_config["JD_INDEX"]
 
     if "resume" not in request.files or not request.form.get("url"):
         return jsonify({

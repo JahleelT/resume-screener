@@ -1,6 +1,6 @@
-from app.backend.embeddings.resume_embeddings import embed_query
-from app.backend.utils.res_pc import query_resume_chunks_for_jd
-from app.backend.chains.multi_step_coordinator import run_resume_pipeline
+from backend.embeddings.resume_embeddings import embed_query
+from backend.utils.res_pc import query_resume_chunks_for_jd
+from backend.chains.multi_step_coordinator import run_resume_pipeline
 from pinecone import Index
 
 def match_resume_with_retrieval(index: Index, resume_id: int, jd_text: str, top_k: int = 5):

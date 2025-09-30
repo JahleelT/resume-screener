@@ -7,11 +7,11 @@ services:
       - mongo_data:/data/db
   
   app:
-    build: ./app
+    build: ./
     ports:
       - "5050:5000"
     env_file:
-      - ./app/.env
+      - ./.env
     depends_on:
       - mongo
 

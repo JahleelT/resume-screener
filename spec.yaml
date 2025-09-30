@@ -39,7 +39,7 @@ services:
       registry: gbs4189
       repository: ml-client
       tag: latest
-    run_command: python app.py
+    run_command: python py
     internal_ports:
       - 5001
     instance_size_slug: apps-s-1vcpu-0.5gb
