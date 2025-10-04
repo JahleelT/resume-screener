@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Result: React.FC = () => {
+export const Home: React.FC = () => {
 
   return (
     <>
@@ -10,4 +10,4 @@ export const Result: React.FC = () => {
 }
 
 
-export default Result;
+export default Home;
