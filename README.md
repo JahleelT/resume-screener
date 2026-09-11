@@ -1,111 +1,151 @@
-[![Unified App CI/CD](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/yml/badge.svg)](https://github.com/JahleelT/jahleelt-resume-screener/actions/workflows/yml)
-
 # Resume Screener
 
-*** ⚠️ This project is being completely reworked and continued by [Jahleel](https;github.com/JahleelT) ⚠️ ***
+Resume Screener is an AI-assisted resume analysis platform designed to compare candidate resumes against job descriptions using semantic retrieval and large language models.
 
-## Quick Note
-- This project was originally a group project, which can be found [here](https://github.com/software-students-spring2025/5-final-finalone), but because I have completely overhauled the backend (and currently working on the frontend), their names have been removed. The original proof-of-concept project will remain at the aforementioned link.
+The project was built to explore document ingestion pipelines, vector search, retrieval-augmented analysis, and full-stack application architecture.
 
-## Current Version
-- ***Frontend:***
-  - **TypeScript:** Enforces type-safety and stronger development than plain JS
-  - **React:** Creates a rich and interactive UI for an enhanced UX.
-  - **Flask-CORS:** Just for routing
-  - 
-  
-- ***Backend:***
-  - **Python:** Base language for the backend to handle endpoints, JWT auth, and orchestration of AI workflows, as well as both database interactions.
-  - **Flask:** Framework used to build the API.
-  - **LangChain:** Used to orchestrate OpenAI with various APIs
-  - **OpenAI:** Cloud-based API to access GPT 4o Mini
-  - **Vector Database (Pinecone):** Used for embedding the unstructured data (resume and job descriptions), enabling efficient similarity search and retrieval, allowing the LLM to analyze and compare content more efficiently.
-  - **SQLAlchemy:** Pythonic SQL for object relational mapping (between User, Resume, and Analysis types)
-  - **Flask-JWT-Extended:** Managing JWT auth
+---
 
-## Former Version
-- An AI-powered application that compares your resume against a job posting and provides actionable feedback. Built with Flask, MongoDB, Playwright, and OpenAI's API. All logic now lives in a unified backend structure.
+## Project Status
 
-## Table of Contents
+This project is no longer under active development.
 
-- [Resume Screener](#resume-screener)
-  - [Quick Note](#quick-note)
-  - [Current Version](#current-version)
-  - [Former Version](#former-version)
-  - [Table of Contents](#table-of-contents)
-  - [Prerequisites](#prerequisites)
-  - [Environment Variables](#environment-variables)
-  - [Setup \& Run Locally](#setup--run-locally)
-  - [Docker Compose](#docker-compose)
-  - [Running Tests](#running-tests)
-- [For py](#for-apppy)
-  - [Container Images](#container-images)
-  - [Deployment](#deployment)
-  - [License](#license)
+The primary objective of the project was to explore and implement an AI-powered resume analysis workflow using modern retrieval and LLM tooling. The backend architecture, document-processing pipeline, vector retrieval workflow, and analysis logic were completed as part of those goals.
 
-## Prerequisites
+The repository is maintained as a portfolio project and reference implementation.
 
-- [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-- [Python 3.10+ ](https://www.python.org/downloads/)
-- [Node.js 18.20+]()
-- [PostgreSQL]()
-- [OpenAI API]()
-- [Pinecone API]()
+---
 
-## Environment Variables
+## Background
 
-1. Create a `.env` file in the ` ` directory based on the provided `.env.example`.
-2. Include the following variables:
+This repository originated as a university group project. The original proof-of-concept version can be found here:
 
+https://github.com/software-students-spring2025/5-final-finalone
 
-```env
-MONGO_URI = mongodb://mongo:27017/resume_db
-SECRET_KEY = your_secret_key
-OPENAI_API_KEY = sk-xxxxxxxxxxxxxxxxxxxxxxxxxxx
+Following completion of the course project, the backend architecture was extensively redesigned and expanded to explore more advanced document processing, vector retrieval, and AI-assisted analysis workflows.
+
+---
+
+## Features
+
+- User registration and authentication
+- Resume upload and storage
+- Resume management APIs
+- Job description ingestion from URLs
+- Resume and job description chunking
+- Embedding generation and vector retrieval
+- AI-powered resume analysis
+- Analysis history tracking
+- RESTful API architecture
+
+---
+
+## Tech Stack
+
+### Backend
+
+- Python
+- Flask
+- SQLAlchemy
+- PostgreSQL
+- OpenAI API
+- LangChain
+- Pinecone
+- Flask-JWT-Extended
+- bcrypt
+
+### Frontend
+
+- React
+- TypeScript
+- Axios
+- React Router
+
+### Infrastructure
+
+- Docker
+- Docker Compose
+- GitHub Actions
+
+---
+
+## Architecture
+
+```text
+Resume
+   ↓
+Document Loader
+   ↓
+Text Chunking
+   ↓
+Embedding Generation
+   ↓
+Pinecone Vector Store
+   ↓
+Retrieval Pipeline
+   ↓
+OpenAI Analysis
+   ↓
+Stored Analysis Results
 ```
 
-1. After copying, rename to `.env` and replace dummy values, including the OpenAI Key, with your own.
+---
 
-## Setup & Run Locally
+## Key Areas of Exploration
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/JahleelT/jahleelt-resume-screener.git
-   cd jahleelt-resume-screener
-   ```
-2. Copy `env.example` to `.env` in ` `, then update values.
-3. Build and start services with Docker Compose:
-   ```bash
-   docker-compose up --build
-   ```
-4. Visit `http://localhost:5050` to access the Web 
+This project focused on:
 
-## Docker Compose
+- REST API design
+- Authentication and user management
+- Database modeling and CRUD operations
+- Retrieval-augmented generation (RAG) workflows
+- Vector search systems
+- Semantic document analysis
+- Document processing pipelines
+- Full-stack application architecture
+- AI application development
 
-The `docker-compose.yml` file defines:
+---
 
-- **mongo**: MongoDB service on port 27017
-- **app**: Unified on port 5050
+## Repository Structure
 
-## Running Tests
- 
-*** ⚠️ Tests are currently on hold until further notice as I migrate the repository from two subsystems to one unified system ⚠️ ***
+```text
+backend/
+├── routes.py
+├── db/
+├── chains/
+├── embeddings/
+├── loaders/
+├── schemas/
+└── utils/
 
-```bash
-# For py
-cd app
-pytest --disable-warnings -q
+frontend/
+├── src/
+├── public/
+└── configuration files
 
+archives/
+└── original project materials
+```
 
-## Container Images
+---
 
-- [gbs4189/web-app](https://hub.docker.com/r/gbs4189/web-app)
-- [gbs4189/ml-client](https://hub.docker.com/r/gbs4189/ml-client)
+## Technologies Explored
 
-## Deployment
+- Resume parsing and ingestion
+- Job description extraction
+- Embedding generation
+- Semantic search
+- Vector databases
+- JWT authentication
+- PostgreSQL data modeling
+- AI-assisted content analysis
+- Containerized development workflows
 
-We deploy to DigitalOcean via GitHub Actions. Configuration is defined in `spec.yaml`. Ensure your DigitalOcean App ID and required secrets are set in GitHub repository settings under **Secrets and variables**.
+---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License.
+
+See the [LICENSE](LICENSE) file for details.
